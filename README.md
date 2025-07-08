@@ -172,6 +172,10 @@ Because this plugin helps you use the YouTube service, you should refer to these
 - [YouTube Terms of Service](https://www.youtube.com/t/terms)
 - [Google Privacy Policy](https://policies.google.com/privacy)
 
+### How can I report security bugs?
+
+You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team helps validate, triage and handle any security vulnerabilities. [Report a security vulnerability.]( https://patchstack.com/database/vdp/ba780b5d-5e4e-4b5a-aa46-21df29abcd05 )
+
 ## Screenshots ##
 
 ### 1. Settings screen ###
