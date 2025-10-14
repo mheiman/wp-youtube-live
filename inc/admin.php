@@ -10,7 +10,7 @@ require 'EmbedYoutubeLiveStreaming.php';
  * Enqueue backend assets
  */
 function youtube_live_backend_assets() {
-	wp_enqueue_script( 'wp-youtube-live-backend', plugin_dir_url( __FILE__ ) . '../js/wp-youtube-live-backend.min.js', array( 'jquery' ), WP_YOUTUBE_LIVE_VERSION, true );
+	wp_enqueue_script( 'wp-youtube-live-backend', plugin_dir_url( __FILE__ ) . '../js/wp-youtube-live-backend.js', array( 'jquery' ), WP_YOUTUBE_LIVE_VERSION, true );
 }
 add_action( 'admin_enqueue_scripts', 'youtube_live_backend_assets' );
 

@@ -23,7 +23,7 @@ require 'inc/admin.php';
  * Enqueue frontend scripts
  */
 function youtube_live_scripts() {
-	wp_register_script( 'wp-youtube-live', plugin_dir_url( __FILE__ ) . 'js/wp-youtube-live.min.js', array( 'jquery' ), WP_YOUTUBE_LIVE_VERSION, true );
+	wp_register_script( 'wp-youtube-live', plugin_dir_url( __FILE__ ) . 'js/wp-youtube-live.js', array( 'jquery' ), WP_YOUTUBE_LIVE_VERSION, true );
 	wp_register_style( 'wp-youtube-live', plugin_dir_url( __FILE__ ) . 'css/wp-youtube-live.css', array(), WP_YOUTUBE_LIVE_VERSION );
 	wp_register_script( 'youtube-iframe-api', 'https://www.youtube.com/iframe_api', array(), null, true ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- because it’s a third-party script that we can’t version.
 }
