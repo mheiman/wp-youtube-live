@@ -266,7 +266,7 @@ function fallback_behavior_render($stage) {
 
 		<?php
 		$upcoming_cache = get_transient( 'youtube-live-upcoming-videos' );
-		if ( false === $upcoming_cache ) {
+		if ( false === $upcoming_cache || empty( $upcoming_cache ) ) {
 			$upcoming_cache = json_decode( refresh_youtube_live_upcoming_cache( 'updatewpYTUpcomingCache', wp_create_nonce( 'wpYTcache_nonce' ) ) );
 		} else {
 		?>
