@@ -418,7 +418,7 @@ function format_upcoming_videos( $input ) {
 	$upcoming_list = '<h3>Cache Contents</h3>
     <p>Cache valid until ' . date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $transient_expire_time[0] ) . '.</p>
     <ul>';
-	if ( is_array( $video_array ) && count( $video_array ) > 0 ) {
+	if ( isset( $video_array ) && is_array( $video_array ) && count( $video_array ) > 0 ) {
 		foreach ( $video_array as $id => $start_time ) {
 			$upcoming_list .= '<li>Video ID <code>' . esc_attr( $id ) . '</code> starting ' . date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), esc_attr( $start_time ) ) . '</li>';
 		}
