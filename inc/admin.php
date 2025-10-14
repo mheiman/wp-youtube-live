@@ -129,6 +129,7 @@ function youtube_live_api_key_render() {
 	$options = get_option( 'youtube_live_settings' ); 
 	if ( ! array_key_exists( 'youtube_live_api_key', $options ) ) {
 		$options['youtube_live_api_key'] = '';
+	}
 	?>
 	<input type="text" name="youtube_live_settings[youtube_live_api_key]" placeholder="AIzaSyD4iE2xVSpkLLOXoyqT-RuPwURN3ddScAI" size="45" value="<?php echo esc_attr( $options['youtube_live_api_key'] ); ?>">
 
