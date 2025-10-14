@@ -190,10 +190,10 @@ function youtube_live_player_settings_render() {
 		$options['default_height'] = 480;
 	}
 	if ( ! array_key_exists( 'autoplay', $options ) ) {
-		$options['autoplay'] = true;
+		$options['autoplay'] = 'true';
 	}
 	if ( ! array_key_exists( 'show_related', $options ) ) {
-		$options['show_related'] = false;
+		$options['show_related'] = 'false';
 	}
 	?>
 	<p>
@@ -283,7 +283,7 @@ function fallback_behavior_render() {
 function youtube_live_auto_refresh_render() {
 	$options = get_option( 'youtube_live_settings' );
 	if ( ! array_key_exists( 'auto_refresh', $options ) ) {
-		$options['auto_refresh'] = false;
+		$options['auto_refresh'] = 'false';
 	}
 	?>
 	Should the player page automatically check every 30 seconds until a live video is available? <label><input type="radio" name="youtube_live_settings[auto_refresh]" value="true" <?php checked( $options['auto_refresh'], 'true' ); ?>> Yes</label> <label><input type="radio" name="youtube_live_settings[auto_refresh]" value="false" <?php checked( $options['auto_refresh'], 'false' ); ?>> No</label>
@@ -314,7 +314,7 @@ function youtube_live_transient_timeout_render() {
 function youtube_live_debugging_render() {
 	$options = get_option( 'youtube_live_settings' );
 	if ( ! array_key_exists( 'debugging', $options ) ) {
-		$options['debugging'] = false;
+		$options['debugging'] = 'false';
 	}
 
 	/**
