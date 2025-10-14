@@ -126,7 +126,10 @@ function youtube_live_settings_init() {
  * Print API Key field
  */
 function youtube_live_api_key_render() {
-	$options = get_option( 'youtube_live_settings' ); ?>
+	$options = get_option( 'youtube_live_settings' ); 
+	if ( ! array_key_exists( 'youtube_live_api_key', $options ) ) {
+		$options['youtube_live_api_key'] = '';
+	?>
 	<input type="text" name="youtube_live_settings[youtube_live_api_key]" placeholder="AIzaSyD4iE2xVSpkLLOXoyqT-RuPwURN3ddScAI" size="45" value="<?php echo esc_attr( $options['youtube_live_api_key'] ); ?>">
 
 	<p>Don&rsquo;t have an API key?</p>
@@ -148,6 +151,9 @@ function youtube_live_api_key_render() {
  */
 function youtube_live_channel_id_render() {
 	$options = get_option( 'youtube_live_settings' );
+	if ( ! array_key_exists( 'youtube_live_channel_id', $options ) ) {
+		$options['youtube_live_channel_id'] = '';
+	}
 	?>
 	<input type="text" name="youtube_live_settings[youtube_live_channel_id]" placeholder="UcZliPwLMjeJbhOAnr1Md4gA" size="45" value="<?php echo esc_attr( $options['youtube_live_channel_id'] ); ?>">
 
@@ -160,6 +166,9 @@ function youtube_live_channel_id_render() {
  */
 function youtube_live_subdomain_render() {
 	$options = get_option( 'youtube_live_settings', array( 'subdomain' => 'www' ) );
+	if ( ! array_key_exists( 'subdomain', $options ) ) {
+		$options['subdomain'] = 'www';
+	}
 	?>
 	<label><select name="youtube_live_settings[subdomain]">
 		<option value="www" <?php selected( $options['subdomain'], 'www' ); ?>>Default (www.youtube.com)</option>
