@@ -102,10 +102,10 @@ class EmbedYoutubeLiveStreaming {
 	 */
 	public function getVideoInfo( $resource_type = 'live', $event_type = 'live' ) {
 		// check transient before performing query.
-		$upcoming_cache = get_transient( 'wp-youtube-live-api-response' );
+		$upcoming_cache = get_transient( 'youtube-live-upcoming-videos' );
 		if ( false === $upcoming_cache ) {
 			$this->cacheUpcomingVideoInfo();
-			$upcoming_cache = get_transient( 'wp-youtube-live-api-response' );
+			$upcoming_cache = get_transient( 'youtube-live-upcoming-videos' );
 		}
 		$wp_youtube_live_api_transient = maybe_unserialize( $upcoming_cache );
 
@@ -214,6 +214,10 @@ class EmbedYoutubeLiveStreaming {
 			}
 
 			$this->embedCode();
+		} else {
+			if (empty($this->errorMessage)) {
+				$this->errorMessage = 'No ' . esc_html( $this->eventType ) . ' streams available.';
+			}
 		}
 	}
 
