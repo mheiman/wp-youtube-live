@@ -7,9 +7,15 @@ var wpYTdata = {
 
 (function($){
     $(document).ready(function(){
-        var fallbackSelector = $('select[name="youtube_live_settings[fallback_behavior]"]');
-        updateFallbackOptions(fallbackSelector);
+        // match indexed names like youtube_live_settings[fallback_behavior], [0], [1], ...
+        var fallbackSelector = $('select[name^="youtube_live_settings[fallback_behavior]"]');
 
+        // initialize each select individually
+        fallbackSelector.each(function(){
+            updateFallbackOptions($(this));
+        });
+
+        // update only the row/context for the changed select
         fallbackSelector.on('change', function() {
             updateFallbackOptions($(this));
         });
@@ -40,12 +46,21 @@ var wpYTdata = {
      * @param {object} fallbackSelector jQuery selector object
      */
     function updateFallbackOptions(fallbackSelector) {
-        var selectedFallback = fallbackSelector.val(),
-            fallbackAll = $('.fallback'),
-            fallbackMessage = $('.fallback.message'),
-            fallbackUpcoming = $('.fallback.upcoming'),
-            fallbackPlaylist = $('.fallback.playlist'),
-            fallbackVideo = $('.fallback.video');
+        var selectedFallback = fallbackSelector.val();
+
+        // find the nearest logical container that groups the select and its related fallback elements
+        var $context = fallbackSelector.closest('tr');
+        if (0 === $context.length) {
+            // fallback to document if no container found (very defensive)
+            $context = $(document);
+        }
+
+        // scope all finders to the context so only elements in the same row/group are affected
+        var fallbackAll = $context.find('.fallback'),
+            fallbackMessage = $context.find('.fallback.message'),
+            fallbackUpcoming = $context.find('.fallback.upcoming'),
+            fallbackPlaylist = $context.find('.fallback.playlist'),
+            fallbackVideo = $context.find('.fallback.video');
 
         if (selectedFallback == 'message') {
             fallbackAll.slideUp();
