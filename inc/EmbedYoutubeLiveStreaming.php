@@ -27,6 +27,7 @@ class EmbedYoutubeLiveStreaming {
 
 	public $queryString; // Address + Data to request.
 
+	public $resource; // resource to query (search, videos, channels, etc).
 	public $part;
 	public $eventType;
 	public $type;
