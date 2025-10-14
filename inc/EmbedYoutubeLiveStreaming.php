@@ -48,7 +48,7 @@ class EmbedYoutubeLiveStreaming {
 	public $live_video_title;
 	public $live_video_description;
 
-	public $live_video_publishedAt;
+	public $live_video_published_at;
 
 	public $live_video_thumb_default;
 	public $live_video_thumb_medium;
