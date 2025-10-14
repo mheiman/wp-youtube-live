@@ -74,11 +74,21 @@ function youtube_live_settings_init() {
 	);
 
 	add_settings_field(
-		'fallback_behavior',
+		'fallback_behavior_0',
 		__( 'Fallback Behavior', 'youtube_live' ),
 		'fallback_behavior_render',
 		'youtube_live_options',
-		'youtube_live_options_keys_section'
+		'youtube_live_options_keys_section',
+		'0'
+	);
+
+	add_settings_field(
+		'fallback_behavior_1',
+		__( 'Secondary Fallback Behavior', 'youtube_live' ),
+		'fallback_behavior_render',
+		'youtube_live_options',
+		'youtube_live_options_keys_section',
+		'1'
 	);
 
 	add_settings_field(
@@ -213,36 +223,42 @@ function youtube_live_player_settings_render() {
 /**
  * Print fallback behavior fields
  */
-function fallback_behavior_render() {
+function fallback_behavior_render($stage) {
 	$options = get_option( 'youtube_live_settings' );
 	if ( ! array_key_exists( 'fallback_behavior', $options ) ) {
-		$options['fallback_behavior'] = 'message';
+		$options['fallback_behavior'][$stage] = 'message';
 	}
 	if ( ! array_key_exists( 'youtube_live_channel_id', $options ) ) {
-		$options['youtube_live_channel_id'] = 'LIVECHANNELID';
+		$options['youtube_live_channel_id'][$stage] = 'LIVECHANNELID';
 	}
 	if ( ! array_key_exists( 'fallback_message', $options ) ) {
-		$options['fallback_message'] = '<p>Sorry, there&rsquo;s no live stream at the moment. Please check back later or take a look at <a target="_blank" href="' . esc_url( 'https://youtube.com/channel/' . $options['youtube_live_channel_id'] ) . '">all of our videos</a>.</p>
+		$options['fallback_message'][$stage] = '<p>Sorry, there&rsquo;s no live stream at the moment. Please check back later or take a look at <a target="_blank" href="' . esc_url( 'https://youtube.com/channel/' . $options['youtube_live_channel_id'][$stage] ) . '">all of our videos</a>.</p>
 <p><button type="button" class="button" id="check-again">Check again</button><span class="spinner" style="display:none;"></span></p>';
+	}
+
+	if ($stage == '0') {
+		$label = 'If no live videos are available, what should be displayed?';
+	} else {
+		$label = 'If the previous fallback fails, what should be displayed?';
 	}
 	?>
 	<p>
-		<label for="youtube_live_settings[fallback_behavior]">If no live videos are available, what should be displayed?</label>
-		<select name="youtube_live_settings[fallback_behavior]">
-			<option value="message" <?php selected( esc_attr( $options['fallback_behavior'] ), 'message' ); ?>>Show a custom HTML message (no additional quota cost)</option>
-			<option value="upcoming" <?php selected( esc_attr( $options['fallback_behavior'] ), 'upcoming' ); ?>>Show scheduled live videos (adds a quota unit cost of 100)</option>
-			<option value="completed" <?php selected( esc_attr( $options['fallback_behavior'] ), 'completed' ); ?>>Show last completed live video (adds a quota unit cost of 100)</option>
-			<option value="channel" <?php selected( esc_attr( $options['fallback_behavior'] ), 'channel' ); ?>>Show recent videos from my channel (adds a quota unit cost of at least 3)</option>
-			<option value="playlist" <?php selected( esc_attr( $options['fallback_behavior'] ), 'playlist' ); ?>>Show a specified playlist (adds a quota unit cost of at least 3)</option>
-			<option value="video" <?php selected( esc_attr( $options['fallback_behavior'] ), 'video' ); ?>>Show a specified video (no additional quota cost)</option>
-			<option value="no_message" <?php selected( esc_attr( $options['fallback_behavior'] ), 'no_message' ); ?>>Show nothing at all (no additional quota cost)</option>
+		<label for="youtube_live_settings[fallback_behavior][<?php echo $stage ?>]"><?php echo $label ?></label>
+		<select name="youtube_live_settings[fallback_behavior][<?php echo $stage ?>]">
+			<option value="message" <?php selected( esc_attr( $options['fallback_behavior'][$stage] ), 'message' ); ?>>Show a custom HTML message (no additional quota cost)</option>
+			<option value="upcoming" <?php selected( esc_attr( $options['fallback_behavior'][$stage] ), 'upcoming' ); ?>>Show scheduled live videos (adds a quota unit cost of 100)</option>
+			<option value="completed" <?php selected( esc_attr( $options['fallback_behavior'][$stage] ), 'completed' ); ?>>Show last completed live video (adds a quota unit cost of 100)</option>
+			<option value="channel" <?php selected( esc_attr( $options['fallback_behavior'][$stage] ), 'channel' ); ?>>Show recent videos from my channel (adds a quota unit cost of at least 3)</option>
+			<option value="playlist" <?php selected( esc_attr( $options['fallback_behavior'][$stage] ), 'playlist' ); ?>>Show a specified playlist (adds a quota unit cost of at least 3)</option>
+			<option value="video" <?php selected( esc_attr( $options['fallback_behavior'][$stage] ), 'video' ); ?>>Show a specified video (no additional quota cost)</option>
+			<option value="no_message" <?php selected( esc_attr( $options['fallback_behavior'][$stage] ), 'no_message' ); ?>>Show nothing at all (no additional quota cost)</option>
 		</select>
 	</p>
 
 	<p class="fallback message">
-		<label for="youtube_live_settings[fallback_message]">Custom HTML message:</label><br/>
-		<textarea cols="50" rows="8" name="youtube_live_settings[fallback_message]" placeholder="<p>Sorry, there&rsquo;s no live stream at the moment. Please check back later or take a look at <a target='_blank' href='<?php echo esc_url( 'https://youtube.com/channel/' . $options['youtube_live_channel_id'] ); ?>'>all of our videos</a>.</p>
-		<p><button type='button' class='button' id='check-again'>Check again</button><span class='spinner' style='display:none;'></span></p>."><?php echo wp_kses_post( $options['fallback_message'] ); ?></textarea>
+		<label for="youtube_live_settings[fallback_message][<?php echo $stage ?>]">Custom HTML message:</label><br/>
+		<textarea cols="50" rows="8" name="youtube_live_settings[fallback_message[<?php echo $stage ?>]" placeholder="<p>Sorry, there&rsquo;s no live stream at the moment. Please check back later or take a look at <a target='_blank' href='<?php echo esc_url( 'https://youtube.com/channel/' . $options['youtube_live_channel_id'] ); ?>'>all of our videos</a>.</p>
+		<p><button type='button' class='button' id='check-again'>Check again</button><span class='spinner' style='display:none;'></span></p>."><?php echo wp_kses_post( $options['fallback_message'][$stage] ); ?></textarea>
 	</p>
 
 	<div class="fallback upcoming">
@@ -252,7 +268,7 @@ function fallback_behavior_render() {
 		$upcoming_cache = get_transient( 'youtube-live-upcoming-videos' );
 		if ( false === $upcoming_cache ) {
 			$upcoming_cache = json_decode( refresh_youtube_live_upcoming_cache( 'updatewpYTUpcomingCache', wp_create_nonce( 'wpYTcache_nonce' ) ) );
-		}
+		} else {
 		?>
 
 		<div class="wp-youtube-live-upcoming-cache"><?php echo wp_kses_post( format_upcoming_videos( $upcoming_cache ) ); ?></div>
@@ -260,17 +276,17 @@ function fallback_behavior_render() {
 		<p>
 			<button type="button" class="button-primary" id="updatewpYTUpcomingCache" data-action="updatewpYTUpcomingCache" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wpYTcache_nonce' ) ); ?>">Clear Cached Upcoming Videos</button> (costs 100 quota units each time)<span class="spinner" style="visibility: hidden;float: none;"></span>
 		</p>
-		<!-- TODO: add secondary fallback if no upcoming videos are scheduled -->
+		<?php } ?>
 	</div>
 
 	<p class="fallback playlist">
-		<label for="youtube_live_settings[fallback_playlist]">Fallback Playlist URL:</label><br/>
-		<input type="text" name="youtube_live_settings[fallback_playlist]" size="45" placeholder="https://www.youtube.com/watch?v=abc123…&list=PLABC123…" value="<?php echo esc_attr( $options['fallback_playlist'] ); ?>" />
+		<label for="youtube_live_settings[fallback_playlist][<?php echo $stage ?>]">Fallback Playlist URL:</label><br/>
+		<input type="text" name="youtube_live_settings[fallback_playlist][<?php echo $stage ?>]" size="45" placeholder="https://www.youtube.com/watch?v=abc123…&list=PLABC123…" value="<?php echo esc_attr( $options['fallback_playlist'][$stage] ); ?>" />
 	</p>
 
 	<p class="fallback video">
-		<label for="youtube_live_settings[fallback_video]">Fallback Video URL:</label><br/>
-		<input type="text" name="youtube_live_settings[fallback_video]" size="45" placeholder="https://youtu.be/dQw4w9WgXcQ" value="<?php echo esc_attr( $options['fallback_video'] ); ?>" />
+		<label for="youtube_live_settings[fallback_video][<?php echo $stage ?>]">Fallback Video URL:</label><br/>
+		<input type="text" name="youtube_live_settings[fallback_video][<?php echo $stage ?>]" size="45" placeholder="https://youtu.be/dQw4w9WgXcQ" value="<?php echo esc_attr( $options['fallback_video'][$stage] ); ?>" />
 	</p>
 
 	<p>For more information on quota usage, read the <a href="https://github.com/macbookandrew/wp-youtube-live#quota-units">plugin documentation</a> as well as the <a href="https://developers.google.com/youtube/v3/getting-started#quota" target="_blank">YouTube API documentation</a>.</p>
