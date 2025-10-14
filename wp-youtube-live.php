@@ -221,7 +221,7 @@ function get_youtube_live_content( $request_options ) {
 		$json_data['error'] .= $debugging_code;
 	}
 
-	if ( 'no_message' !== $youtube_options['fallback_behavior'] ) {
+	if ( 'no_message' !== $youtube_options['fallback_behavior'] && isset($error_message) ) {
 		echo '<span class="wp-youtube-live-error" style="display: none;">' . wp_kses_post( $error_message ) . '</span>
         </div>';
 	}
