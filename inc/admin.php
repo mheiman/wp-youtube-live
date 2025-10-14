@@ -250,17 +250,20 @@ function fallback_behavior_render() {
 
 		<?php
 		$upcoming_cache = get_transient( 'youtube-live-upcoming-videos' );
-		if ( false === $upcoming_cache || empty( $upcoming_cache ) ) {
-			$upcoming_cache = json_decode( refresh_youtube_live_upcoming_cache( 'updatewpYTUpcomingCache', wp_create_nonce( 'wpYTcache_nonce' ) ) );
-		}
+		if ( false === $upcoming_cache ) {
+			$cache_refresh = refresh_youtube_live_upcoming_cache( 'updatewpYTUpcomingCache', wp_create_nonce( 'wpYTcache_nonce' ) );
+			if ( $cache_refresh ) {
+				$upcoming_cache = json_decode( $cache_refresh );
+			}
+		} 
+
+		if ($upcoming_cache) {
 		?>
-
-		<div class="wp-youtube-live-upcoming-cache"><?php echo wp_kses_post( format_upcoming_videos( $upcoming_cache ) ); ?></div>
-
+			<div class="wp-youtube-live-upcoming-cache"><?php echo wp_kses_post( format_upcoming_videos( $upcoming_cache ) ); ?></div>
+`		<?php } ?>
 		<p>
 			<button type="button" class="button-primary" id="updatewpYTUpcomingCache" data-action="updatewpYTUpcomingCache" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wpYTcache_nonce' ) ); ?>">Clear Cached Upcoming Videos</button> (costs 100 quota units each time)<span class="spinner" style="visibility: hidden;float: none;"></span>
 		</p>
-		<!-- TODO: add secondary fallback if no upcoming videos are scheduled -->
 	</div>
 
 	<p class="fallback playlist">
