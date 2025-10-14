@@ -55,7 +55,9 @@ function output_youtube_live( $atts ) {
 			'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
 			'auto_refresh'      => $settings['auto_refresh'],
 			'fallback_behavior' => $settings['fallback_behavior'],
-			'fallback_message'  => ( array_key_exists( 'no_stream_message', $settings ) ? $settings['no_stream_message'] : $settings['fallback_message'] ),
+			'fallback_message'  => ( array_key_exists( 'no_stream_message', $settings ) 
+				? $settings['no_stream_message'] 
+				: (array_key_exists( 'no_stream_message', $settings ) ? $settings['fallback_message'][0] : 'No live stream is currently available. Please check back later.' )),
 			'no_stream_message' => null,
 			'fallback_playlist' => $settings['fallback_playlist'],
 			'fallback_video'    => $settings['fallback_video'],
@@ -173,12 +175,12 @@ function get_youtube_live_content( $request_options ) {
 				$youtube_live->getVideoInfo( 'live', 'upcoming' );
 				if ($youtube_live->getErrorMessage() === null) {
 					echo $youtube_live->embedCode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method.
-				} // else echo $youtube_live->getErrorMessage();
+				}  else echo $youtube_live->getErrorMessage();
 			} elseif ( 'completed' === $fallback ) {
 				$youtube_live->getVideoInfo( 'live', 'completed' );
 				if ($youtube_live->getErrorMessage() === null) {
 					echo $youtube_live->embedCode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method.
-				} // else echo $youtube_live->getErrorMessage();
+				}  else echo $youtube_live->getErrorMessage();
 			} elseif ( 'channel' === $fallback ) {
 				$youtube_live->getVideoInfo( 'channel' );
 				if ($youtube_live->getErrorMessage() === null) {
@@ -217,8 +219,7 @@ function get_youtube_live_content( $request_options ) {
 			foreach ( $youtube_live->getAllErrors() as $error ) {
 				$error_message .= '<li><strong>Domain:</strong> ' . esc_url( $error['domain'] ) . '</li>
 				<li><strong>Reason:</strong> ' . esc_attr( $error['reason'] ) . '</li>
-				<li><strong>Message:</strong> ' . esc_attr( $error['message'] ) . '</li>
-				<li><strong>Extended help:</strong> ' . wp_kses_post( $error['extendedHelp'] ) . '</li>';
+				<li><strong>Message:</strong> ' . esc_attr( $error['message'] ) . '</li>';
 			}
 			if ( 'video' === $youtube_options['fallback_behavior'] && empty( $youtube_options['fallback_video'] ) ) {
 				$error_message .= '<li>Please double-check that you have set a fallback video.</li>';
