@@ -222,6 +222,9 @@ function fallback_behavior_render() {
 		$options['fallback_message'] = '<p>Sorry, there&rsquo;s no live stream at the moment. Please check back later or take a look at <a target="_blank" href="' . esc_url( 'https://youtube.com/channel/' . $options['youtube_live_channel_id'] ) . '">all of our videos</a>.</p>
 <p><button type="button" class="button" id="check-again">Check again</button><span class="spinner" style="display:none;"></span></p>';
 	}
+	if ( ! array_key_exists( 'youtube_live_channel_id', $options ) ) {
+		$options['youtube_live_channel_id'] = 'LIVECHANNELID';
+	}
 	?>
 	<p>
 		<label for="youtube_live_settings[fallback_behavior]">If no live videos are available, what should be displayed?</label>
