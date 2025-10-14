@@ -135,7 +135,7 @@ function get_youtube_live_content( $request_options ) {
 		'error' => null,
 	);
 	ob_start();
-	if ( 'no_message' !== $youtube_options['fallback_behavior'] ) {
+	if ( 'no_message' !== $youtube_options['fallback_behavior'][0] ) {
 		echo '<div class="wp-youtube-live ' . ( $youtube_live->isLive ? 'live' : 'dead' ) . '">';
 	}
 
@@ -167,23 +167,34 @@ function get_youtube_live_content( $request_options ) {
 			'rel'      => ( 'true' === $youtube_live->show_related ? '1' : '0' ),
 		);
 
-		if ( 'upcoming' === $request_options['fallback_behavior'] ) {
-			$youtube_live->getVideoInfo( 'live', 'upcoming' );
-			echo $youtube_live->embedCode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method.
-		} elseif ( 'completed' === $request_options['fallback_behavior'] ) {
-			$youtube_live->getVideoInfo( 'live', 'completed' );
-			echo $youtube_live->embedCode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method.
-		} elseif ( 'channel' === $request_options['fallback_behavior'] ) {
-			$youtube_live->getVideoInfo( 'channel' );
-			echo $youtube_live->embedCode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method.
-		} elseif ( 'playlist' === $request_options['fallback_behavior'] ) {
-			add_filter( 'oembed_result', 'wp_ytl_add_player_attributes_result', 10, 3 );
-			echo wp_kses_post( wp_oembed_get( esc_attr( $youtube_options['fallback_playlist'] ), $player_args ) );
-		} elseif ( 'video' === $request_options['fallback_behavior'] && isset( $youtube_options['fallback_video'] ) ) {
-			add_filter( 'oembed_result', 'wp_ytl_add_player_attributes_result', 10, 3 );
-			echo wp_kses_post( wp_oembed_get( esc_attr( $youtube_options['fallback_video'] ), $player_args ) );
-		} elseif ( 'message' === $request_options['fallback_behavior'] && 'no_message' !== $request_options['fallback_message'] ) {
-			echo wp_kses_post( apply_filters( 'wp_youtube_live_no_stream_available', $request_options['fallback_message'] ) );
+		foreach($request_options['fallback_behavior'] as $stage => $fallback) {
+			echo "<p>$stage:$fallback</p>";
+			if ( 'upcoming' === $fallback ) {
+				$youtube_live->getVideoInfo( 'live', 'upcoming' );
+				if ($youtube_live->getErrorMessage() === null) {
+					echo $youtube_live->embedCode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method.
+				} // else echo $youtube_live->getErrorMessage();
+			} elseif ( 'completed' === $fallback ) {
+				$youtube_live->getVideoInfo( 'live', 'completed' );
+				if ($youtube_live->getErrorMessage() === null) {
+					echo $youtube_live->embedCode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method.
+				} // else echo $youtube_live->getErrorMessage();
+			} elseif ( 'channel' === $fallback ) {
+				$youtube_live->getVideoInfo( 'channel' );
+				if ($youtube_live->getErrorMessage() === null) {
+					echo $youtube_live->embedCode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method.
+				}
+			} elseif ( 'playlist' === $fallback ) {
+				add_filter( 'oembed_result', 'wp_ytl_add_player_attributes_result', 10, 3 );
+				echo wp_kses_post( wp_oembed_get( esc_attr( $youtube_options['fallback_playlist'][$stage] ), $player_args ) );
+			} elseif ( 'video' === $fallback && isset( $youtube_options['fallback_video'][$stage] ) ) {
+				add_filter( 'oembed_result', 'wp_ytl_add_player_attributes_result', 10, 3 );
+				echo wp_kses_post( wp_oembed_get( esc_attr( $youtube_options['fallback_video'][$stage] ), $player_args ) );
+			} elseif ( 'message' === $fallback && 'no_message' !== $request_options['fallback_message'][$stage] ) {
+				echo wp_kses_post( apply_filters( 'wp_youtube_live_no_stream_available', $request_options['fallback_message'][$stage] ) );
+			}
+
+			if ($youtube_live->getErrorMessage() === null) break;
 		}
 	}
 
