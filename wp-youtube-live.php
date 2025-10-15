@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'WP_YOUTUBE_LIVE_VERSION', '1.10.0' );
+define( 'WP_YOUTUBE_LIVE_VERSION', '2.0.0' );
 
 /**
  * Include admin.
@@ -325,14 +325,19 @@ function wp_ytl_plugin_activation() {
 	$request_options = get_option( 'youtube_live_settings', array() );
 
 	// removed in v1.7.0.
-	if ( array_key_exists( 'show_channel_if_dead', $request_options ) && 'true' === $request_options['show_channel_if_dead'] ) {
-		$request_options['fallback_behavior'] = 'channel';
+	if ( array_key_exists( 'show_channel_if_dead', $request_options ) 
+		&& 'true' === $request_options['show_channel_if_dead'] 
+		&& ! array_key_exists( 'fallback_behavior', $request_options )) {
+			$request_options['fallback_behavior'] = 'channel';
 	}
 	unset( $request_options['show_channel_if_dead'] );
 
 	// updated in v1.7.0.
-	if ( array_key_exists( 'fallback_video', $request_options ) && isset( $request_options['fallback_video'] ) ) {
-		$request_options['fallback_behavior'] = 'video';
+	if ( array_key_exists( 'fallback_video', $request_options ) 
+		&& isset( $request_options['fallback_video'] ) 
+		&& ! is_array( $request_options['fallback_video'] ) 
+		&& ! array_key_exists( 'fallback_behavior', $request_options ) ) {
+			$request_options['fallback_behavior'] = 'video';
 	}
 
 	// added in v1.7.0.
@@ -345,6 +350,13 @@ function wp_ytl_plugin_activation() {
 		$request_options['show_related'] = 'false';
 	}
 
+	// Staged fallback
+	foreach ( array( 'fallback_behavior', 'fallback_message', 'fallback_playlist', 'fallback_video' ) as $option ) {
+		if ( ! array_key_exists( $option, $request_options ) || ! is_array( $request_options[ $option ] ) ) {
+			$request_options[ $option ] = array( 0 => ( array_key_exists( $option, $request_options ) ? $request_options[ $option ] : null ) );
+		}
+	}
+	
 	update_option( 'youtube_live_settings', $request_options );
 	update_option( 'youtube_live_version', WP_YOUTUBE_LIVE_VERSION );
 }

@@ -1,6 +1,6 @@
 {
   "name": "wp-youtube-live",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Displays the current YouTube live video from a specified channel",
   "main": "index.js",
   "scripts": {
