@@ -57,7 +57,7 @@ function output_youtube_live( $atts ) {
 			'fallback_behavior' => $settings['fallback_behavior'],
 			'fallback_message'  => ( array_key_exists( 'no_stream_message', $settings ) 
 				? $settings['no_stream_message'] 
-				: (array_key_exists( 'no_stream_message', $settings ) ? $settings['fallback_message'][0] : 'No live stream is currently available. Please check back later.' )),
+				: (array_key_exists( 'no_stream_message', $settings ) ? $settings['no_stream_message'] : $settings['fallback_message'] )),
 			'no_stream_message' => null,
 			'fallback_playlist' => $settings['fallback_playlist'],
 			'fallback_video'    => $settings['fallback_video'],
@@ -195,7 +195,6 @@ function get_youtube_live_content( $request_options ) {
 			} elseif ( 'message' === $fallback && 'no_message' !== $request_options['fallback_message'][$stage] ) {
 				echo wp_kses_post( apply_filters( 'wp_youtube_live_no_stream_available', $request_options['fallback_message'][$stage] ) );
 			}
-
 			if ($youtube_live->getErrorMessage() === null) break;
 		}
 	}
