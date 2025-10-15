@@ -338,12 +338,12 @@ function wp_ytl_plugin_activation() {
 
 	// added in v1.7.0.
 	if ( ! array_key_exists( 'autoplay', $request_options ) ) {
-		$request_options['autoplay'] = true;
+		$request_options['autoplay'] = 'true';
 	}
 
 	// added in v1.7.0.
 	if ( ! array_key_exists( 'show_related', $request_options ) ) {
-		$request_options['show_related'] = false;
+		$request_options['show_related'] = 'false';
 	}
 
 	update_option( 'youtube_live_settings', $request_options );
