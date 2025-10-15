@@ -257,7 +257,7 @@ function fallback_behavior_render($stage) {
 
 	<p class="fallback message">
 		<label for="youtube_live_settings[fallback_message][<?php echo $stage ?>]">Custom HTML message:</label><br/>
-		<textarea cols="50" rows="8" name="youtube_live_settings[fallback_message[<?php echo $stage ?>]" placeholder="<p>Sorry, there&rsquo;s no live stream at the moment. Please check back later or take a look at <a target='_blank' href='<?php echo esc_url( 'https://youtube.com/channel/' . $options['youtube_live_channel_id'] ); ?>'>all of our videos</a>.</p>
+		<textarea cols="50" rows="8" name="youtube_live_settings[fallback_message][<?php echo $stage ?>]" placeholder="<p>Sorry, there&rsquo;s no live stream at the moment. Please check back later or take a look at <a target='_blank' href='<?php echo esc_url( 'https://youtube.com/channel/' . $options['youtube_live_channel_id'] ); ?>'>all of our videos</a>.</p>
 		<p><button type='button' class='button' id='check-again'>Check again</button><span class='spinner' style='display:none;'></span></p>."><?php echo wp_kses_post( $options['fallback_message'][$stage] ); ?></textarea>
 	</p>
 
