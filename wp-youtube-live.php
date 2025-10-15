@@ -170,17 +170,17 @@ function get_youtube_live_content( $request_options ) {
 		);
 
 		foreach($request_options['fallback_behavior'] as $stage => $fallback) {
-			echo "<p>$stage:$fallback</p>";
+			// echo "<p>$stage:$fallback</p>";
 			if ( 'upcoming' === $fallback ) {
 				$youtube_live->getVideoInfo( 'live', 'upcoming' );
 				if ($youtube_live->getErrorMessage() === null) {
 					echo $youtube_live->embedCode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method.
-				}  else echo $youtube_live->getErrorMessage();
+				}  // else echo $youtube_live->getErrorMessage();
 			} elseif ( 'completed' === $fallback ) {
 				$youtube_live->getVideoInfo( 'live', 'completed' );
 				if ($youtube_live->getErrorMessage() === null) {
 					echo $youtube_live->embedCode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method.
-				}  else echo $youtube_live->getErrorMessage();
+				}  // else echo $youtube_live->getErrorMessage();
 			} elseif ( 'channel' === $fallback ) {
 				$youtube_live->getVideoInfo( 'channel' );
 				if ($youtube_live->getErrorMessage() === null) {
