@@ -102,10 +102,10 @@ class EmbedYoutubeLiveStreaming {
 	 */
 	public function getVideoInfo( $resource_type = 'live', $event_type = 'live' ) {
 		// check transient before performing query.
-		$upcoming_cache = get_transient( 'youtube-live-upcoming-videos' );
+		$upcoming_cache = get_transient( 'wp-youtube-live-api-response' );
 		if ( false === $upcoming_cache ) {
 			$this->cacheUpcomingVideoInfo();
-			$upcoming_cache = get_transient( 'youtube-live-upcoming-videos' );
+			$upcoming_cache = get_transient( 'wp-youtube-live-api-response' );
 		}
 		$wp_youtube_live_api_transient = maybe_unserialize( $upcoming_cache );
 
@@ -122,6 +122,8 @@ class EmbedYoutubeLiveStreaming {
 			$this->removeFromUpcomingCache( $this->completed_video_id );
 		}
 
+		$previous_resource_type = $this->resource;
+
 		if ( ! isset( $this->completed_video_id ) && $wp_youtube_live_api_transient && array_key_exists( $this->eventType, $wp_youtube_live_api_transient ) ) {
 			// 30-second transient is set and is valid
 			reset( $wp_youtube_live_api_transient );
@@ -129,25 +131,28 @@ class EmbedYoutubeLiveStreaming {
 			$this->jsonResponse                       = $wp_youtube_live_api_transient[ $key_name ];
 			$this->objectResponse                     = json_decode( $this->jsonResponse );
 			$this->objectResponse->fromTransientCache = true;
+			echo "<p>Using transient cache for " . esc_html( $this->eventType ) . " data.</p>\n";
 		} elseif ( 'upcoming' === $this->eventType || ( isset( $this->completed_video_id ) && '' !== $this->completed_video_id ) ) {
-			// get info for this video.
-			$this->resource = 'videos';
+			$id = $this->getUpcomingVideoInfo();
+			if ($id) {
+			
+				// get info for this video.
+				$this->queryData = array(
+					'key'  => $this->API_Key,
+					'part' => 'id,snippet',
+					'id'   => $id,
+				);
 
-			$this->queryData = array(
-				'key'  => $this->API_Key,
-				'part' => 'id,snippet',
-				'id'   => $this->getUpcomingVideoInfo(),
-			);
+				// run the query.
+				$this->queryAPI('videos');
 
-			// run the query.
-			$this->queryAPI();
-
-			// save to 30-second transient to reduce API calls.
-			$API_results = array( $this->eventType => $this->jsonResponse );
-			if ( is_array( $wp_youtube_live_api_transient ) ) {
-				$API_results = array_merge( $API_results, $wp_youtube_live_api_transient );
+				// save to 30-second transient to reduce API calls.
+				$API_results = array( $this->eventType => $this->jsonResponse );
+				if ( is_array( $wp_youtube_live_api_transient ) ) {
+					$API_results = array_merge( $API_results, $wp_youtube_live_api_transient );
+				}
+				set_transient( 'wp-youtube-live-api-response', maybe_serialize( $API_results ), $this->getTransientTimeout() );
 			}
-			set_transient( 'wp-youtube-live-api-response', maybe_serialize( $API_results ), $this->getTransientTimeout() );
 		} else {
 			// no 30-second transient is set.
 
@@ -181,6 +186,8 @@ class EmbedYoutubeLiveStreaming {
 				$API_results = array_merge( $API_results, $wp_youtube_live_api_transient );
 			}
 			set_transient( 'wp-youtube-live-api-response', maybe_serialize( $API_results ), $this->getTransientTimeout() );
+
+			echo "<p>Queried API for " . esc_html( $this->eventType ) . " data.</p>\n";
 		}
 
 		if ( isset( $this->objectResponse->items ) && count( $this->objectResponse->items ) > 0 && ( ( 'live' === $this->resource_type && $this->isLive() ) || ( 'live' === $this->resource_type && in_array( $this->eventType, array( 'upcoming', 'completed', true ) ) ) ) ) {
@@ -200,13 +207,12 @@ class EmbedYoutubeLiveStreaming {
 			$this->channel_title = $this->objectResponse->items[0]->snippet->channelTitle;
 			$this->embedCode();
 		} elseif ( 'channel' === $this->resource_type ) {
-			$this->resource  = 'channels';
 			$this->queryData = array(
 				'id'   => $this->channelId,
 				'key'  => $this->API_Key,
 				'part' => 'contentDetails',
 			);
-			$this->queryAPI();
+			$this->queryAPI('channels');
 
 			if ( $this->objectResponse ) {
 				$this->uploads_id    = $this->objectResponse->items[0]->contentDetails->relatedPlaylists->uploads;
@@ -254,10 +260,8 @@ class EmbedYoutubeLiveStreaming {
 		$all_upcoming_videos = json_decode( $this->queryAPI() );
 		$all_videos_array    = array();
 
-		$previous_resource_type = $this->resource;
 		if ( property_exists( $all_upcoming_videos, 'items' ) && is_array( $all_upcoming_videos->items ) ) {
 			foreach ( $all_upcoming_videos->items as $video ) {
-				$this->resource  = 'videos';
 				$this->queryData = array(
 					'channelId' => $this->channelId,
 					'key'       => $this->API_Key,
@@ -265,7 +269,7 @@ class EmbedYoutubeLiveStreaming {
 					'part'      => 'liveStreamingDetails',
 				);
 
-				$this_video = json_decode( $this->queryAPI() );
+				$this_video = json_decode( $this->queryAPI('videos') );
 				$start_time = date( 'U', strtotime( $this_video->items[0]->liveStreamingDetails->scheduledStartTime ) );
 
 				if ( '0' !== $start_time && $start_time > ( time() - 900 ) ) { // only include videos scheduled in the future, minus a 15-minute grace period.
@@ -273,7 +277,6 @@ class EmbedYoutubeLiveStreaming {
 				}
 			}
 		}
-		$this->resource = $previous_resource_type;
 
 		// sort by date.
 		asort( $all_videos_array );
@@ -349,10 +352,10 @@ class EmbedYoutubeLiveStreaming {
 	 *
 	 * @return string JSON API response
 	 */
-	public function queryAPI() {
+	public function queryAPI($resource = 'search') {
 		$this->getQuery    = http_build_query( $this->queryData ); // transform array of data in url query.
-		$this->queryString = $this->getAddress . $this->resource . '?' . $this->getQuery;
-
+		$this->queryString = $this->getAddress . $resource . '?' . $this->getQuery;
+		echo "<p>Querying: " . esc_html( $this->queryString ) . "</p>\n";
 		// request from API via curl.
 		$curl = curl_init();
 		curl_setopt( $curl, CURLOPT_URL, $this->queryString );
