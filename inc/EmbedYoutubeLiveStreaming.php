@@ -102,12 +102,7 @@ class EmbedYoutubeLiveStreaming {
 	 */
 	public function getVideoInfo( $resource_type = 'live', $event_type = 'live' ) {
 		// check transient before performing query.
-		$upcoming_cache = get_transient( 'wp-youtube-live-api-response' );
-		if ( false === $upcoming_cache ) {
-			$this->cacheUpcomingVideoInfo();
-			$upcoming_cache = get_transient( 'wp-youtube-live-api-response' );
-		}
-		$wp_youtube_live_api_transient = maybe_unserialize( $upcoming_cache );
+		$wp_youtube_live_api_transient = maybe_unserialize( get_transient( 'wp-youtube-live-api-response' ) );
 
 		if ( ! $this->resource_type || $resource_type !== $this->resource_type ) {
 			$this->resource_type = $resource_type;
@@ -131,7 +126,6 @@ class EmbedYoutubeLiveStreaming {
 			$this->jsonResponse                       = $wp_youtube_live_api_transient[ $key_name ];
 			$this->objectResponse                     = json_decode( $this->jsonResponse );
 			$this->objectResponse->fromTransientCache = true;
-			echo "<p>Using transient cache for " . esc_html( $this->eventType ) . " data.</p>\n";
 		} elseif ( 'upcoming' === $this->eventType || ( isset( $this->completed_video_id ) && '' !== $this->completed_video_id ) ) {
 			$id = $this->getUpcomingVideoInfo();
 			if ($id) {
@@ -186,8 +180,6 @@ class EmbedYoutubeLiveStreaming {
 				$API_results = array_merge( $API_results, $wp_youtube_live_api_transient );
 			}
 			set_transient( 'wp-youtube-live-api-response', maybe_serialize( $API_results ), $this->getTransientTimeout() );
-
-			echo "<p>Queried API for " . esc_html( $this->eventType ) . " data.</p>\n";
 		}
 
 		if ( isset( $this->objectResponse->items ) && count( $this->objectResponse->items ) > 0 && ( ( 'live' === $this->resource_type && $this->isLive() ) || ( 'live' === $this->resource_type && in_array( $this->eventType, array( 'upcoming', 'completed', true ) ) ) ) ) {
@@ -355,7 +347,6 @@ class EmbedYoutubeLiveStreaming {
 	public function queryAPI($resource = 'search') {
 		$this->getQuery    = http_build_query( $this->queryData ); // transform array of data in url query.
 		$this->queryString = $this->getAddress . $resource . '?' . $this->getQuery;
-		echo "<p>Querying: " . esc_html( $this->queryString ) . "</p>\n";
 		// request from API via curl.
 		$curl = curl_init();
 		curl_setopt( $curl, CURLOPT_URL, $this->queryString );
