@@ -72,8 +72,11 @@ function output_youtube_live( $atts ) {
 		unset( $shortcode_attributes['no_stream_message'] );
 	}
 
-	wp_add_inline_script( 'wp-youtube-live', 'var wpYouTubeLiveSettings = ' . wp_json_encode( $shortcode_attributes ), 'before' );
-
+	$localise = json_encode($shortcode_attributes);
+	add_action('wp_footer', function() use ($localise){
+  		printf('<script type="text/javascript">var wpYouTubeLiveSettings = %s</script>', $localise);
+	});
+	
 	return get_youtube_live_content( $shortcode_attributes );
 }
 add_shortcode( 'youtube_live', 'output_youtube_live' );
@@ -235,7 +238,7 @@ function get_youtube_live_content( $request_options ) {
 	if ( isset($error_message) ) {
 		echo '<span class="wp-youtube-live-error" style="display: none;">' . wp_kses_post( $error_message ) . '</span>';
 	}
-	
+
 	if ( 'no_message' !== $fallback ) {
 		echo '</div>';
 	}
