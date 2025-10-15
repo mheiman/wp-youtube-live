@@ -226,17 +226,17 @@ function youtube_live_player_settings_render() {
 function fallback_behavior_render($stage) {
 	$options = get_option( 'youtube_live_settings' );
 	if ( ! array_key_exists( 'fallback_behavior', $options ) ) {
-		$options['fallback_behavior'] = array( '0' => 'message' );
+		$options['fallback_behavior'] = array( $stage => 'message' );
 	}
 	if ( ! array_key_exists( $stage, $options['fallback_behavior'] ) ) {
-		$options['fallback_behavior'][$stage] = 'no_message';
+		$options['fallback_behavior'] = array($stage => 'no_message');
 	}
 	if ( ! array_key_exists( 'youtube_live_channel_id', $options ) ) {
-		$options['youtube_live_channel_id'][$stage] = 'LIVECHANNELID';
+		$options['youtube_live_channel_id'] = array('LIVECHANNELID');
 	}
 	if ( ! array_key_exists( 'fallback_message', $options ) ) {
-		$options['fallback_message'][$stage] = '<p>Sorry, there&rsquo;s no live stream at the moment. Please check back later or take a look at <a target="_blank" href="' . esc_url( 'https://youtube.com/channel/' . $options['youtube_live_channel_id'][$stage] ) . '">all of our videos</a>.</p>
-<p><button type="button" class="button" id="check-again">Check again</button><span class="spinner" style="display:none;"></span></p>';
+		$options['fallback_message'] = array($stage => '<p>Sorry, there&rsquo;s no live stream at the moment. Please check back later or take a look at <a target="_blank" href="' . esc_url( 'https://youtube.com/channel/' . $options['youtube_live_channel_id'][$stage] ) . '">all of our videos</a>.</p>
+<p><button type="button" class="button" id="check-again">Check again</button><span class="spinner" style="display:none;"></span></p>');
 	}
 
 	if ($stage == '0') {
