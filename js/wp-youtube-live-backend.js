@@ -27,6 +27,13 @@ var wpYTdata = {
             wpYTsendRequest(wpYTdata);
         });
 
+        $('body').on('click', 'button#updatewpYTCache', function(event) {
+            event.preventDefault();
+            wpYTdata.action = $(this).data('action');
+            wpYTdata.nonce = $(this).data('nonce');
+            wpYTsendRequest(wpYTdata);
+        });
+
 		/** Handle dismissable notices */
 		$(document).on('click', '.wp-youtube-live-notice .notice-dismiss', function(e) {
 			var version = $(this).parents('.wp-youtube-live-notice').data('version');
@@ -84,7 +91,9 @@ var wpYTdata = {
      * @param {object} wpYTdata data sent to server
      */
     function wpYTsendRequest(wpYTdata) {
-        $('.wp-youtube-live-upcoming-cache').html('<p>Flushing cache&hellip;</p>');
+        var $displayAction = (wpYTdata.action == 'updatewpYTCache') ? $('.wp-youtube-live-cache') : $('.wp-youtube-live-upcoming-cache');
+
+        $displayAction.html('<p>Flushing cache&hellip;</p>');
         $('.spinner').css({'visibility': 'visible'});
         $.ajax({
             method: "POST",
@@ -93,7 +102,7 @@ var wpYTdata = {
         })
         .done(function(response) {
             var requestData = JSON.parse(response);
-            $('.wp-youtube-live-upcoming-cache').html(requestData);
+            $displayAction.html(requestData);
         })
         .always(function() {
             $('.spinner').css({'visibility': 'hidden'});

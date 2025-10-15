@@ -267,7 +267,7 @@ function fallback_behavior_render($stage) {
 		<?php
 		$upcoming_cache = get_transient( 'youtube-live-upcoming-videos' );
 		if ( false === $upcoming_cache ) {
-			$cache_refresh = refresh_youtube_live_upcoming_cache( 'updatewpYTUpcomingCache', wp_create_nonce( 'wpYTcache_nonce' ) );
+			$cache_refresh = refresh_youtube_live_cache( 'updatewpYTUpcomingCache', wp_create_nonce( 'wpYTcache_nonce' ) );
 			if ( $cache_refresh ) {
 				$upcoming_cache = json_decode( $cache_refresh );
 			}
@@ -276,9 +276,9 @@ function fallback_behavior_render($stage) {
 		if ($upcoming_cache) {
 		?>
 			<div class="wp-youtube-live-upcoming-cache"><?php echo wp_kses_post( format_upcoming_videos( $upcoming_cache ) ); ?></div>
-`		<?php } ?>
+		<?php } ?>
 		<p>
-			<button type="button" class="button-primary" id="updatewpYTUpcomingCache" data-action="updatewpYTUpcomingCache" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wpYTcache_nonce' ) ); ?>">Clear Cached Upcoming Videos</button> (costs 100 quota units each time)<span class="spinner" style="visibility: hidden;float: none;"></span>
+			<button type="button" class="button-primary" id="updatewpYTUpcomingCache" data-action="updatewpYTUpcomingCache" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wpYTcache_nonce' ) ); ?>">Refresh Upcoming Video Cache</button> (costs 100 quota units each time)<span class="spinner" style="visibility: hidden;float: none;"></span>
 		</p>
 	</div>
 
@@ -377,13 +377,13 @@ function youtube_live_options_page() {
 }
 
 /**
- * Manually clear upcoming video cache
+ * Manually clear caches
  *
  * @param string $action action to perform.
  * @param string $nonce  security nonce.
  * @return string|void JSON string of upcoming videos
  */
-function refresh_youtube_live_upcoming_cache( $action = null, $nonce = null ) {
+function refresh_youtube_live_cache( $action = null, $nonce = null ) {
 
 	if ( ! $action && isset( $_POST['action'] ) ) {
 		$action = sanitize_key( wp_unslash( $_POST['action'] ) );
@@ -397,10 +397,10 @@ function refresh_youtube_live_upcoming_cache( $action = null, $nonce = null ) {
 		die( 'Invalid nonce.' );
 	}
 
-	$youtube_options = get_option( 'youtube_live_settings' );
-	$youtube_live    = new EmbedYoutubeLiveStreaming( $youtube_options['youtube_live_channel_id'], $youtube_options['youtube_live_api_key'] );
-
 	if ( 'updatewpytupcomingcache' === $action ) { // sanitize_key converts to lower-case.
+		$youtube_options = get_option( 'youtube_live_settings' );
+		$youtube_live    = new EmbedYoutubeLiveStreaming( $youtube_options['youtube_live_channel_id'], $youtube_options['youtube_live_api_key'] );
+
 		if ( $youtube_live->clearUpcomingVideoInfo() ) {
 			$output = wp_json_encode( format_upcoming_videos( get_transient( 'youtube-live-upcoming-videos' ) ) );
 			if ( $_POST ) {
@@ -411,8 +411,23 @@ function refresh_youtube_live_upcoming_cache( $action = null, $nonce = null ) {
 			}
 		}
 	}
+
+	if ( 'updatewpytcache' === $action ) { // sanitize_key converts to lower-case.
+		if ( delete_transient( 'wp-youtube-live-api-response' ) ) {
+			$output = wp_json_encode( 'Cleared cache.' );
+		} else {
+			$output = wp_json_encode( 'Cache was not cleared.' );
+		}
+		if ( $_POST ) {
+			echo wp_kses_post( $output );
+			die();
+		} else {
+			return $output;
+		}
+	}
 }
-add_action( 'wp_ajax_updatewpYTUpcomingCache', 'refresh_youtube_live_upcoming_cache' );
+add_action( 'wp_ajax_updatewpYTUpcomingCache', 'refresh_youtube_live_cache' );
+add_action( 'wp_ajax_updatewpYTCache', 'refresh_youtube_live_cache' );
 
 /**
  * Return list of video IDs and start times
@@ -456,7 +471,9 @@ function format_upcoming_videos( $input ) {
  */
 function youtube_live_tools_render() {
 	?>
-	<p><a class="btn primary" target="_blank" href="<?php echo esc_url( admin_url( 'admin-ajax.php?action=youtube_live_flush_cache' ) ); ?>">Flush Cache</a></p>
+	<p>Press the button below to flush all cached YouTube API responses. This may be useful if you&rsquo;ve changed your channel ID or API key, or if you want to force the plugin to check for a new live video immediately.</p>
+	<p><button type="button" class="button-primary" id="updatewpYTCache" data-action="updatewpYTCache" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wpYTcache_nonce' ) ); ?>">Flush Cache</button> <span class="spinner" style="visibility: hidden;float: none;"></span></p>
+	<p class="wp-youtube-live-cache"></p>
 	<?php
 }
 
