@@ -220,7 +220,7 @@ function get_youtube_live_content( $request_options ) {
 				<li><strong>Reason:</strong> ' . esc_attr( $error['reason'] ) . '</li>
 				<li><strong>Message:</strong> ' . esc_attr( $error['message'] ) . '</li>';
 			}
-			if ( 'video' === $youtube_options['fallback_behavior'] && empty( $youtube_options['fallback_video'] ) ) {
+			if ( 'video' === $fallback && empty( $youtube_options['fallback_video'] ) ) {
 				$error_message .= '<li>Please double-check that you have set a fallback video.</li>';
 			}
 			$error_message     .= '</ul>';
@@ -232,7 +232,7 @@ function get_youtube_live_content( $request_options ) {
 		$json_data['error'] .= $debugging_code;
 	}
 
-	if ( 'no_message' !== $youtube_options['fallback_behavior'] && isset($error_message) ) {
+	if ( 'no_message' !== $fallback && isset($error_message) ) {
 		echo '<span class="wp-youtube-live-error" style="display: none;">' . wp_kses_post( $error_message ) . '</span>
         </div>';
 	}
