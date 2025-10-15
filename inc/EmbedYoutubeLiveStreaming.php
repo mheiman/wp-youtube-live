@@ -88,6 +88,7 @@ class EmbedYoutubeLiveStreaming {
 		$this->embed_height = $this->default_embed_height;
 
 		$this->embed_autoplay = true;
+		$this->errorArray   = array();
 
 		if ( true === $autoQuery ) {
 			$this->getVideoInfo();
