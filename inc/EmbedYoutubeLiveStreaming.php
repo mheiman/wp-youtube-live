@@ -207,7 +207,7 @@ class EmbedYoutubeLiveStreaming {
 			);
 			$this->queryAPI('channels');
 
-			if ( $this->objectResponse ) {
+			if ( $this->objectResponse && property_exists( $this->objectResponse, 'items' ) && is_array( $this->objectResponse->items ) && count( $this->objectResponse->items ) > 0 ) {
 				$this->uploads_id    = $this->objectResponse->items[0]->contentDetails->relatedPlaylists->uploads;
 				$this->resource_type = 'channel';
 			}
