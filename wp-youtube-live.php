@@ -140,9 +140,6 @@ function get_youtube_live_content( $request_options ) {
 		'error' => null,
 	);
 	ob_start();
-	if ( 'no_message' !== $youtube_options['fallback_behavior'][0] ) {
-		echo '<div class="wp-youtube-live ' . ( $youtube_live->isLive ? 'live' : 'dead' ) . '">';
-	}
 
 	if ( $youtube_live->isLive ) {
 		if ( ( array_key_exists( 'js_only', $request_options ) && 'true' !== $request_options['js_only'] ) || ( array_key_exists( 'js_only', $request_options ) && 'true' === $request_options['js_only'] && wp_youtube_live_is_ajax() ) ) {
@@ -239,14 +236,17 @@ function get_youtube_live_content( $request_options ) {
 		echo '<span class="wp-youtube-live-error" style="display: none;">' . wp_kses_post( $error_message ) . '</span>';
 	}
 
-	if ( 'no_message' !== $fallback ) {
-		echo '</div>';
+	// return the content.
+	if ( $youtube_live->isLive || 'no_message' !== $fallback ) {
+		$content =  '<div class="wp-youtube-live ' . ( $youtube_live->isLive ? 'live' : 'dead' ) . '">' . ob_get_clean() . '</div>';
+	} else {
+		$content = '';
+		ob_end_clean();
 	}
 
-	// return the content.
 	if ( wp_youtube_live_is_ajax() ) {
 		if ( isset( $_POST['requestType'] ) && sanitize_key( wp_unslash( $_POST['requestType'] ) ) !== 'refresh' || $is_live ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- because we have to allow unauthenticated users the ability to check for live videos, as well as handle statically-cached markup that might contain a stale nonce.
-			$json_data['content'] = ob_get_clean();
+			$json_data['content'] = $content;
 		} else {
 			ob_clean();
 		}
@@ -257,7 +257,7 @@ function get_youtube_live_content( $request_options ) {
 		echo wp_json_encode( $json_data, JSON_FORCE_OBJECT );
 		wp_die();
 	} else {
-		return ob_get_clean();
+		return $content;
 	}
 }
 
